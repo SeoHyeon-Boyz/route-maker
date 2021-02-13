@@ -18,14 +18,20 @@
       <GmapMarker :position="{lat: mymarker.lat, lng: mymarker.lng}" />
       <gmap-polyline :path.sync="route" :options="{ strokeColor:'#008000'}" />
     </GmapMap>
-    <div>
-      <button @click="myposition">시작</button>
-      <button @click="clearWatch">끝</button>
+    <div class="isWorking">
+      <img src="@/assets/images/ico/ico_working_on.png" v-if="isWorking"/>
+      <img src="@/assets/images/ico/ico_working_off.png" v-else/>
     </div>
-    <div>
-      <div>저장된 루트 {{getRouteStorage.length}}개</div>
-      <div>
-        <div v-for="(item, idx) in getRouteStorage" :key="idx" @click="showRoute(item)">루트{{idx + 1}}</div>
+    <div class="buttonWrap">
+      <div class="buttonBox">
+        <div class="setBtn btnS" @click="myposition">시작</div>
+        <div class="setBtn btnC" @click="clearWatch">끝</div>
+      </div>
+    </div>
+    <div class="routeStorageWrap">
+      <div class="routeLength">저장된 루트 {{getRouteStorage.length}}개</div>
+      <div class="routesBox">
+        <div v-for="item in getRouteStorage" :key="String(item.createAt)" class="routeItem" @click="showRoute(item.route)">{{item.title}}</div>
       </div>
     </div>
   </div>
@@ -42,6 +48,7 @@ export default {
         lat : 37.5536472,
         lng : 126.964296
       },
+      isWorking: false,
       route: [],
       watchID: null
     }
@@ -68,6 +75,7 @@ export default {
       }
     },
     successPosition: function(position){
+      this.isWorking = true
       this.mymarker = {
         lat: position.coords.latitude,
         lng: position.coords.longitude
@@ -79,16 +87,19 @@ export default {
     },
     clearWatch() {
       navigator.geolocation.clearWatch(this.watchID)
+      this.isWorking = false
       if(confirm('루트를 저장하시겠습니까?')) {
-        this.$store.dispatch('addReview', this.route)
+        const lodash = require('lodash')
+        const copy = lodash.cloneDeep(this.route)
+        this.$router.push({ name: 'RouteSetting', params: { routeData: copy }})
         this.route = []
-        alert('루트 저장 완료')
       } else {
         alert('루트가 삭제되었습니다.')
       }
     },
     showRoute(route){
       this.route = route
+      this.mymarker = route[0]
     }
   }
 }
@@ -98,5 +109,52 @@ export default {
 .gMap {
   width: 100vw;
   height: 65vh;
+}
+.isWorking {
+  display: flex;
+  margin: 15px 0;
+}
+.isWorking img {
+  margin: 0 10px 0 auto;
+  width: 40px;
+}
+.buttonWrap {
+  padding: 12px;
+  border-top: 1px solid gray;
+  border-bottom: 1px solid gray;
+  display: flex;
+  margin-bottom: 15px;
+}
+.buttonBox {
+  margin: 0 auto;
+  display: flex;
+}
+.buttonBox .setBtn {
+  margin: 0 50px;
+  text-align: center;
+  width: 82px;
+  padding: 8px 0;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  background-color: gray;
+  cursor: pointer;
+}
+.routeStorageWrap {
+  padding: 10px;
+  font-size: 16px;
+}
+.routeStorageWrap .routesBox {
+  background-color: gray;
+  margin: 10px 0;
+  padding: 6px;
+  min-width: calc(100vw - 32px);
+  min-height: 80px;
+  border-radius: 6px;
+  color: white;
+}
+.routesBox .routeItem {
+  margin: 6px;
 }
 </style>

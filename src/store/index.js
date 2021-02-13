@@ -17,7 +17,7 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    addReview ({ commit }, payload) {
+    addRoute ({ commit }, payload) {
       commit('ADD_ROUTE', payload)
     }
   },
