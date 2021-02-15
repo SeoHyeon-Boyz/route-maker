@@ -19,8 +19,7 @@
       <gmap-polyline :path.sync="route" :options="{ strokeColor:'#008000'}" />
     </GmapMap>
     <div class="isWorking">
-      <img src="@/assets/images/ico/ico_working_on.png" v-if="isWorking"/>
-      <img src="@/assets/images/ico/ico_working_off.png" v-else/>
+      <img :src="require(`@/assets/images/ico/ico_working_${ isWorking ? 'on' : 'off'}.png`)"/>
     </div>
     <div class="buttonWrap">
       <div class="buttonBox">
@@ -50,6 +49,7 @@ export default {
       },
       isWorking: false,
       route: [],
+      routeByTime: [],
       watchID: null
     }
   },
@@ -81,6 +81,7 @@ export default {
         lng: position.coords.longitude
       }
       this.route.push(this.mymarker)
+      this.routeByTime.push(new Date())
     },
     failurePosition: function(err){
       alert("Error Code: " + err.code + " Error Message: " + err.message);
@@ -90,8 +91,9 @@ export default {
       this.isWorking = false
       if(confirm('루트를 저장하시겠습니까?')) {
         const lodash = require('lodash')
-        const copy = lodash.cloneDeep(this.route)
-        this.$router.push({ name: 'RouteSetting', params: { routeData: copy }})
+        const routeCopy = lodash.cloneDeep(this.route)
+        const timeCopy = lodash.cloneDeep(this.routeByTime)
+        this.$router.push({ name: 'RouteSetting', params: { routeData: routeCopy, timeData: timeCopy }})
         this.route = []
       } else {
         alert('루트가 삭제되었습니다.')
