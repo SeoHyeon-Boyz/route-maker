@@ -1,9 +1,6 @@
 <template>
   <div class="routeSetting">
     <div class="routeForm">
-      <div class="inputBox">
-        <input v-model="title" placeholder="제목을 입력해주세요."/>
-      </div>
       <GmapMap
       class="gMap"
       :center="{lat: routeData[0].lat, lng: routeData[0].lng}"
@@ -22,11 +19,26 @@
         <gmap-polyline :path.sync="routeData" :options="{ strokeColor:'#008000'}" />
         <gmap-polyline :path.sync="savedRouteData" :options="{ strokeColor:'red'}" />
       </GmapMap>
-      <!-- 루트를 시간별로 나열해서 앞뒤 부분은 자를 수 있게 -->
-      <div class="sliderWrap">
-        <RangeSlider :len="timeData.length" @emitIdxRange="idxRange = $event"/>
+      <div class="optMap">
+        <div class="inputBox">
+          제목 : 
+          <input v-model="title" placeholder="제목을 입력해주세요."/>
+        </div>
+        <div class="sliderWrap">
+          <RangeSlider :len="timeData.length" @emitIdxRange="idxRange = $event"/>
+          <div class="pickedTimes" v-if="idxRange">
+            <div>
+              s: {{timeData[idxRange[0]] | dateFormat}}
+            </div>
+            <div>
+              e: {{timeData[idxRange[1]] | dateFormat}}
+            </div>
+          </div>
+        </div>
+        <div class="buttonBox">
+          <div class="setBtn" @click="saveRoute">저장</div>
+        </div>
       </div>
-      <div @click="saveRoute">저장</div>
     </div>
   </div>
 </template>
@@ -41,7 +53,7 @@ export default {
     return {
       title: null,
       idxRange: null,
-      savedRouteData: []
+      savedRouteData: null
     }
   },
   components: {
@@ -73,6 +85,19 @@ export default {
       this.$router.push({ name: 'Home' })
     }
   },
+  filters: {
+    dateFormat (date) {
+      const year = date.getFullYear()
+      const month = date.getMonth() + 1
+      const day = date.getDate()
+      const hours = date.getHours()
+      const minutes = date.getMinutes()
+      const seconds = date.getSeconds()
+
+
+      return `${hours}시 ${minutes}분 ${seconds}초`
+    }
+  },
   watch: {
     'idxRange' (to, from) {
       const lodash = require('lodash')
@@ -88,7 +113,27 @@ export default {
   width: 100vw;
   height: 65vh;
 }
+.optMap {
+  display: flex;
+  flex-direction: column;
+}
+.optMap > div {
+  margin: 10px auto;
+}
 .sliderWrap {
+  width: 80vw;
   padding: 40px;
+}
+.buttonBox .setBtn {
+  margin: 0 50px;
+  text-align: center;
+  width: 82px;
+  padding: 8px 0;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  background-color: gray;
+  cursor: pointer;
 }
 </style>

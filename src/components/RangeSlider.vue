@@ -4,7 +4,6 @@
     v-model="value"
     :tooltip="'none'"
     :data="data" />
-    {{value}}
   </div>
 </template>
 

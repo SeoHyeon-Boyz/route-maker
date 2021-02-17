@@ -61,17 +61,33 @@ export default {
     ...mapGetters(['getRouteStorage']),
   },
   methods: {
-    myposition : function() {
+    myposition () {
       if (navigator.geolocation) {
         this.route = []
-        this.watchID = navigator.geolocation.watchPosition(this.successPosition, this.failurePosition,
-        {
-          enableHighAccuracy: false,
-          timeout: 5000,
-          maximumAge: 0
-        })
+        const now = this
+        this.watchID = setInterval(function() {
+          navigator.geolocation.getCurrentPosition(now.successPosition, now.failurePosition,
+          {
+            enableHighAccuracy: false,
+            timeout: 5000,
+            maximumAge: 0
+          })
+        },500)
       }else{
         console.log("Your browser does not support Geolocation API")
+      }
+    },
+    clearWatch () {
+      clearInterval(this.watchID)
+      this.isWorking = false
+      if(confirm('루트를 저장하시겠습니까?')) {
+        const lodash = require('lodash')
+        const routeCopy = lodash.cloneDeep(this.route)
+        const timeCopy = lodash.cloneDeep(this.routeByTime)
+        this.$router.push({ name: 'RouteSetting', params: { routeData: routeCopy, timeData: timeCopy }})
+        this.route = []
+      } else {
+        alert('루트가 삭제되었습니다.')
       }
     },
     successPosition: function(position){
@@ -85,19 +101,6 @@ export default {
     },
     failurePosition: function(err){
       alert("Error Code: " + err.code + " Error Message: " + err.message);
-    },
-    clearWatch() {
-      navigator.geolocation.clearWatch(this.watchID)
-      this.isWorking = false
-      if(confirm('루트를 저장하시겠습니까?')) {
-        const lodash = require('lodash')
-        const routeCopy = lodash.cloneDeep(this.route)
-        const timeCopy = lodash.cloneDeep(this.routeByTime)
-        this.$router.push({ name: 'RouteSetting', params: { routeData: routeCopy, timeData: timeCopy }})
-        this.route = []
-      } else {
-        alert('루트가 삭제되었습니다.')
-      }
     },
     showRoute(route){
       this.route = route
